@@ -1,0 +1,36 @@
+{
+    "id": "urn:ngsild:Vehicle:vehicle:MobilityManagement:196671",
+    "type": "Vehicle",
+    "category": {"type": "Property", "value": "tracked"},
+    "vehicleNumber": {"type": "Property", "value": "379131"},
+    "battery": [
+        {
+            "type": "Property",
+            "value": 1,
+            "observedAt": "2024-09-25T04:30:06Z",
+            "unitCode": "P1"
+        },
+        {
+            "type": "Property",
+            "value": 0.98,
+            "observedAt": "2024-09-24T16:42:24Z",
+            "unitCode": "P1"
+        }
+    ],
+    "location": [
+        {
+            "type": "GeoProperty",
+            "value": {"type": "Point", "coordinates": [43.460405, -3.853312]},
+            "observedAt": "2024-09-24T15:45:58Z"
+        },
+        {
+            "type": "GeoProperty",
+            "value": {"type": "Point", "coordinates": [43.459994, -3.820141]},
+            "observedAt": "2024-09-24T15:09:14Z"
+        }
+    ],
+    "@context": [
+        "https://raw.githubusercontent.com/smart-data-models/dataModel.ERA/master/context.jsonld",
+        "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context-v1.7.jsonld"
+    ]
+}
