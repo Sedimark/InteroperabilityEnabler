@@ -9,7 +9,7 @@ from ie.utils.extract_data import extract_columns
 from ie.utils.add_metadata import add_metadata_to_predictions_from_dataframe
 
 
-FILE_PATH_JSON = "example_json.json"
+FILE_PATH_JSON = "tests/example_json.json"
 
 # Expected values to validate
 DATA = {
