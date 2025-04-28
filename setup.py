@@ -1,0 +1,28 @@
+from setuptools import setup, find_packages
+
+setup(
+    name="ie",
+    version="0.1",
+    author="Shahin ABDOUL SOUKOUR",
+    author_email="abdoul-shahin.abdoul-soukour@inria.fr",
+    description="Interoperability Enabler",
+    long_description=open("README.md", encoding="utf-8").read(),
+    long_description_content_type="text/markdown",
+    url="https://github.com/Sedimark/IE",
+    license="",
+    packages=find_packages(
+        include=["ie", "ie.*"],
+    ),
+    classifiers=[
+        "Programming Language :: Python :: 3",
+        "Operating System :: OS Independent",
+    ],
+    python_requires=">=3.7",
+    install_requires=["numpy", "pandas", "python-dateutil", "pytz", "six", "tzdata", "xlrd"],
+    extras_require={
+        "dev": [
+            "pytest",
+        ],
+    },
+    include_package_data=True,
+)
