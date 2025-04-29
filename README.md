@@ -19,7 +19,7 @@ The source code can be found on GitHub at https://github.com/Sedimark/IE.
 To install the package, you can use pip:
 
 ```bash
-pip install interoperability_enabler
+pip install interoperability-enabler
 ```
 
 ## Acknowledgement
