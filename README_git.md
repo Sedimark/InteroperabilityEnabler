@@ -13,3 +13,7 @@
 ## Installation
 
 ...
+
+## Project Structure
+
+...
