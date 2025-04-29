@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="interoperability-enabler",
+    name="interoperability_enabler",
     version="__VERSION__",
     author="Shahin ABDOUL SOUKOUR",
     author_email="abdoul-shahin.abdoul-soukour@inria.fr",
@@ -11,7 +11,7 @@ setup(
     url="https://github.com/Sedimark/IE",
     license="",
     packages=find_packages(
-        include=["ie", "ie.*"],
+        include=["interoperability_enabler", "interoperability_enabler.*"],
     ),
     classifiers=[
         "Programming Language :: Python :: 3",
