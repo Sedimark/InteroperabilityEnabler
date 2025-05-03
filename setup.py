@@ -1,17 +1,17 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="interoperability-enabler",
+    name="InteroperabilityEnabler",
     version="__VERSION__",
     author="Shahin ABDOUL SOUKOUR",
     author_email="abdoul-shahin.abdoul-soukour@inria.fr",
     description="Interoperability Enabler",
-    long_description=open("README.md", encoding="utf-8").read(),
+    long_description=open("README_package.md", encoding="utf-8").read(),
     long_description_content_type="text/markdown",
-    url="https://github.com/Sedimark/IE",
+    url="https://github.com/Sedimark/InteroperabilityEnabler",
     license="",
     packages=find_packages(
-        include=["ie", "ie.*"],
+        include=["InteroperabilityEnabler", "InteroperabilityEnabler.*"],
     ),
     classifiers=[
         "Programming Language :: Python :: 3",

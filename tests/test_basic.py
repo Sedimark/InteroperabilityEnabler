@@ -1,12 +1,12 @@
 import pandas as pd
 import pytest
-from ie.utils.data_formatter import data_to_dataframe
-from ie.utils.annotation_dataset import add_quality_annotations_to_df
-from ie.utils.data_mapper import data_conversion, restore_ngsi_ld_structure
+from InteroperabilityEnabler.utils.data_formatter import data_to_dataframe
+from InteroperabilityEnabler.utils.annotation_dataset import add_quality_annotations_to_df
+from InteroperabilityEnabler.utils.data_mapper import data_conversion, restore_ngsi_ld_structure
 from io import StringIO
-from ie.utils.merge_data import merge_predicted_data
-from ie.utils.extract_data import extract_columns
-from ie.utils.add_metadata import add_metadata_to_predictions_from_dataframe
+from InteroperabilityEnabler.utils.merge_data import merge_predicted_data
+from InteroperabilityEnabler.utils.extract_data import extract_columns
+from InteroperabilityEnabler.utils.add_metadata import add_metadata_to_predictions_from_dataframe
 
 
 FILE_PATH_JSON = "tests/example_json.json"
