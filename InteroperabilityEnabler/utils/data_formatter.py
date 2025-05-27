@@ -12,45 +12,41 @@ import json
 import pandas as pd
 
 
-def data_to_dataframe(file_path):
+def data_to_dataframe(data):
     """
-    Read data from different file types (xls, xlsx, csv, json, jsonld) and
-    convert them into a pandas DataFrame.
+    Convert data from file path or raw JSON/JSON-LD into a flattened pandas DataFrame.
 
     Args:
-        file_path (str): The path to the data file.
+        data (str | dict | list): Path to a data file or a JSON/JSON-LD object.
 
-    Return:
-        Pandas DataFrame.
+    Returns:
+        pd.DataFrame: Flattened data as a DataFrame.
     """
     df = None
     try:
-        if file_path.endswith(".xls") or file_path.endswith(".xlsx"):
-            df = pd.read_excel(file_path)
-        elif file_path.endswith(".csv"):
-            df = pd.read_csv(file_path)
-        elif file_path.endswith(".json") or file_path.endswith(".jsonld"):
-            with open(file_path, "r", encoding="utf-8") as file:
-                json_data = json.load(file)
-
-                # Handle JSON/JSON-LD data specifically
-                if isinstance(json_data, list):
-                    entities = json_data
-                else:
-                    entities = json_data.get(
-                        "@graph", [json_data]
-                    )  # Handle as a list of entities
-
-                # Flatten the entities
-                flattened_entities = [flatten_entity(entity) for entity in entities]
-                df = pd.DataFrame(flattened_entities)
+        if isinstance(data, str):
+            # Handle file path
+            if data.endswith(".xls") or data.endswith(".xlsx"):
+                df = pd.read_excel(data)
+            elif data.endswith(".csv"):
+                df = pd.read_csv(data)
+            elif data.endswith(".json") or data.endswith(".jsonld"):
+                with open(data, "r", encoding="utf-8") as file:
+                    json_data = json.load(file)
+                    entities = json_data if isinstance(json_data, list) else json_data.get("@graph", [json_data])
+                    df = pd.DataFrame([flatten_dict(e) for e in entities])
+                    df.reset_index(drop=True, inplace=True)
+            else:
+                raise ValueError("Unsupported file format. Must be .xls, .xlsx, .csv, .json, or .jsonld")
+        elif isinstance(data, (dict, list)):
+            # Handle raw JSON or JSON-LD object directly
+            entities = data if isinstance(data, list) else data.get("@graph", [data])
+            df = pd.DataFrame([flatten_dict(e) for e in entities])
+            df.reset_index(drop=True, inplace=True)
         else:
-            raise ValueError(
-                "Unsupported file format. Supported formats are xls, xlsx, json, jsonld, and csv."
-            )
+            raise ValueError("Unsupported input type. Must be file path or JSON object.")
     except Exception as e:
-        print(f"Error processing file {file_path}: {e}")
-
+        print(f"Error processing data: {e}")
     return df
 
 
@@ -60,63 +56,37 @@ def flatten_dict(d, parent_key="", sep=".", preserve_keys=None):
 
     Args:
         d (dict): The dictionary to flatten.
-        parent_key (str): The base key for recursion, used to create hierarchical keys.
-        sep (str): The separator for nested keys (default is '.').
-        preserve_keys (list): Keys whose values should not be flattened (default is None).
-
-    Return:
-        A flattened dictionary with keys representing the hierarchy.
-    """
-    if preserve_keys is None:
-        preserve_keys = ["coordinates", "@context"]  # Keys to preserve as lists
-    items = []
-    for k, v in d.items():
-        # Create the new key by appending current key to parent_key
-        new_key = f"{parent_key}{sep}{k}" if parent_key else k
-        # Recursively flatten if value is a dictionary
-        if isinstance(v, dict):
-            if k in preserve_keys:
-                # Preserve the dictionary as-is if key is in preserve_keys
-                items.append((new_key, v))
-            else:
-                items.extend(
-                    flatten_dict(
-                        v, new_key, sep=sep, preserve_keys=preserve_keys
-                    ).items()
-                )
-        elif isinstance(v, list) and k in preserve_keys:
-            # Preserve the list as-is
-            items.append((new_key, v))
-        elif isinstance(v, list):
-            # Flatten lists unless the key is in preserve_keys
-            for i, item in enumerate(v):
-                if isinstance(item, dict):
-                    # Flatten each dictionary inside the list
-                    items.extend(
-                        flatten_dict(
-                            item,
-                            f"{new_key}[{i}]",
-                            sep=sep,
-                            preserve_keys=preserve_keys,
-                        ).items()
-                    )
-                else:
-                    # Handle primitive values in the list
-                    items.append((f"{new_key}[{i}]", item))
-        # Handle all other key-value pairs
-        else:
-            items.append((new_key, v))
-    return dict(items)
-
-
-def flatten_entity(entity):
-    """
-    Flattens a single NGSI-LD entity by applying flatten_dict.
-
-    Args:
-        entity (dict): The NGSI-LD entity to flatten.
+        parent_key (str): Prefix for keys during recursion.
+        sep (str): Separator used for key hierarchy.
+        preserve_keys (list): Keys whose values should not be flattened.
 
     Returns:
-        dict: A flattened version of the entity.
+        dict: A flattened dictionary.
     """
-    return flatten_dict(entity)
+    if preserve_keys is None:
+        preserve_keys = ["coordinates", "@context"]
+
+    items = []
+    for k, v in d.items():
+        new_key = f"{parent_key}{sep}{k}" if parent_key else k
+
+        if isinstance(v, dict):
+            if k in preserve_keys:
+                items.append((new_key, v))
+            else:
+                items.extend(flatten_dict(v, new_key, sep=sep, preserve_keys=preserve_keys).items())
+
+        elif isinstance(v, list):
+            if k in preserve_keys:
+                items.append((new_key, v))
+            else:
+                for i, item in enumerate(v):
+                    if isinstance(item, dict):
+                        items.extend(flatten_dict(item, f"{new_key}[{i}]", sep=sep, preserve_keys=preserve_keys).items())
+                    else:
+                        items.append((f"{new_key}[{i}]", item))
+
+        else:
+            items.append((new_key, v))
+
+    return dict(items)
