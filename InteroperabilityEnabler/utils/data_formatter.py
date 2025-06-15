@@ -10,6 +10,7 @@ Maintainer: Shahin ABDOUL SOUKOUR - Inria
 
 import json
 import pandas as pd
+from io import StringIO
 
 
 def data_to_dataframe(data):
@@ -28,7 +29,7 @@ def data_to_dataframe(data):
             # Handle file path
             if data.endswith(".xls") or data.endswith(".xlsx"):
                 df = pd.read_excel(data)
-            elif data.endswith(".csv"):
+            elif data.endswith(".csv") :
                 df = pd.read_csv(data)
             elif data.endswith(".json") or data.endswith(".jsonld"):
                 with open(data, "r", encoding="utf-8") as file:
@@ -37,7 +38,14 @@ def data_to_dataframe(data):
                     df = pd.DataFrame([flatten_dict(e) for e in entities])
                     df.reset_index(drop=True, inplace=True)
             else:
-                raise ValueError("Unsupported file format. Must be .xls, .xlsx, .csv, .json, or .jsonld")
+                # Check if it's raw CSV content (contains commas and newlines)
+                if '\n' in data and (',' in data or ';' in data):
+                    try:
+                        df = pd.read_csv(StringIO(data))
+                    except pd.errors.ParserError:
+                        df = pd.read_csv(StringIO(data), sep=';')
+                else:
+                    raise ValueError("Unsupported file format or content. Must be .xls, .xlsx, .csv, .json, .jsonld, or raw CSV content")
         elif isinstance(data, (dict, list)):
             # Handle raw JSON or JSON-LD object directly
             entities = data if isinstance(data, list) else data.get("@graph", [data])
