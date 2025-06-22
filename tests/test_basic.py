@@ -292,4 +292,5 @@ def test_merge_predicted_data_predicted_missing_column():
     predicted_df = pd.DataFrame({"temperature": [-6.6, -6.1]})  # missing windSpeed
     merged = merge_predicted_data(df_initial, predicted_df)
     assert "windSpeed" in merged.columns
-    assert merged.iloc[2]["windSpeed"] == np.nan
+    # Proper way to check for NaN values
+    assert pd.isna(merged.iloc[2]["windSpeed"]) # This checks if the value is NaN
