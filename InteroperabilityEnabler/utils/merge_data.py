@@ -5,20 +5,20 @@ Author: Shahin ABDOUL SOUKOUR - Inria
 Maintainer: Shahin ABDOUL SOUKOUR - Inria
 """
 
+import numpy as np
 import pandas as pd
-
 
 def merge_predicted_data(df_initial, predicted_df_with_metadata):
     """
     Merge predicted data into the initial DataFrame by matching column names.
-    Add 'null' for missing columns in the predicted data.
+    Add `np.nan` (proper null) for missing columns in the predicted data.
 
     Args:
         df_initial: DataFrame containing the original selected columns.
-        predicted_df_with_metadata: DataFrame containing the predicted data with metadata (column names).
+        predicted_df_with_metadata: DataFrame containing the predicted data with metadata.
 
     Returns:
-        A merged Pandas DataFrame with 'null' for missing columns.
+        A merged Pandas DataFrame with `np.nan` for missing columns.
     """
     try:
         # Get all unique columns from both DataFrames
@@ -29,9 +29,9 @@ def merge_predicted_data(df_initial, predicted_df_with_metadata):
         # Ensure all columns are present in both DataFrames
         for col in all_columns:
             if col not in df_initial.columns:
-                df_initial[col] = "null"
+                df_initial[col] = np.nan  # Use np.nan instead of "null"
             if col not in predicted_df_with_metadata.columns:
-                predicted_df_with_metadata[col] = "null"
+                predicted_df_with_metadata[col] = np.nan  # Use np.nan instead of "null"
 
         # Reorder columns to match the initial DataFrame's order
         df = df_initial[sorted(all_columns)]
