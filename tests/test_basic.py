@@ -38,6 +38,10 @@ PREDICTED_CSV = """
 
 @pytest.mark.parametrize("file_path", [FILE_PATH_JSON])
 def test_data_formatter(file_path):
+    """
+    Data Formatter component tests.
+    Converts JSON data to DataFrames.
+    """
     # Load the JSON file from disk
     with open(file_path, "r", encoding="utf-8") as f:
         json_data = json.load(f)
@@ -56,6 +60,10 @@ def test_data_formatter(file_path):
 
 @pytest.mark.parametrize("file_path", [FILE_PATH_JSON])
 def test_instance_level_annotation(file_path):
+    """
+    Data quality annotation component tests.
+    Instance-level annotations.
+    """
     # Load JSON data
     with open(file_path, "r", encoding="utf-8") as f:
         json_data = json.load(f)
@@ -84,6 +92,10 @@ def test_instance_level_annotation(file_path):
 
 @pytest.mark.parametrize("file_path", [FILE_PATH_JSON])
 def test_attribute_level_annotation(file_path):
+    """
+    Data quality annotation component tests.
+    Attribut-level annotation.
+    """
     # Load JSON data from file
     with open(file_path, "r", encoding="utf-8") as f:
         json_data = json.load(f)
@@ -123,6 +135,10 @@ def test_attribute_level_annotation(file_path):
 
 @pytest.mark.parametrize("file_path", [FILE_PATH_JSON])
 def test_data_mapper(file_path):
+    """
+    Data Mapper component tests.
+    Converts structured data to JSON format.
+    """
     # Load JSON data
     with open(file_path, "r", encoding="utf-8") as f:
         json_data = json.load(f)
