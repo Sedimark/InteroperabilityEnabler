@@ -5,9 +5,9 @@ Interoperability Enabler (IE) component is designed to facilitate seamless integ
 
 ## Key Feature
 
-- Data Formatter - Convert data from various formats into the SEDIMARK internal processing format (pandas DataFrames)
+- Data Formatter - Convert JSON data (time-series data) into the SEDIMARK internal processing format (pandas DataFrames)
 - Data Quality Annotations - Enable adding any kind of quality annotations to data inside pandas DataFrames
-- Data Mapper – Convert data from pandas DataFrames into NGSI-LD json
+- Data Mapper – Convert data from pandas DataFrames into JSON
 - Data Extractor – Extract relevant data from a pandas DataFrame
 - Metadata Restorer – Restore metadata to a pandas DataFrame
 - Data Merger – Merge two DataFrames by matching column names
@@ -27,14 +27,11 @@ pip install InteroperabilityEnabler
 #### Data Formatter (to convert the input data into a pandas DataFrame)
 
 ```python
-from InteroperabilityEnabler.utils.data_formatter import data_to_dataframe
+from InteroperabilityEnabler.utils.data_formatter import data_formatter
 
-FILE_PATH="sample.jsonld"
-df = data_to_dataframe(FILE_PATH)
+FILE_PATH="sample.json"
+context_df, time_series_df = data_formatter(FILE_PATH)
 ```
-
-It recursively flattens dictionaries while preserving key hierarchies, supporting nested structures and ensuring efficient processing and interoperability.
-
 
 #### Data Quality Annotations (to enrich pandas DataFrames by adding quality annotations)
 
@@ -42,45 +39,27 @@ Instance-level annotations:
 ```python
 from InteroperabilityEnabler.utils.annotation_dataset import add_quality_annotations_to_df
 
-entity_type_annotation = "entity_type_value" # entity type for quality annotations
-annotated_df = add_quality_annotations_to_df(
-    df,
-    entity_type = entity_type_annotation,
-    assessed_attrs = None,
-    # type = "new_type", # If there is no type in the input file, a new one can be created
-    # context_value = [link1, link2] # If there is no @context in the input file, a new one can be created
+context_df, annotated_df = add_quality_annotations_to_df(
+    context_df, time_series_df, assessed_attrs=None
 )
 ```
 
-Attribut-level annotation:
+Attribute-level annotation:
 ```python
 from InteroperabilityEnabler.utils.annotation_dataset import add_quality_annotations_to_df
 
-entity_type_annotation = "entity_type_value" # entity type for quality annotations
-assessed_attrs = ["attribut_name"]  # Base attribute name (metadata)
-annotated_df = add_quality_annotations_to_df(
-     df, entity_type = entity_type_annotation, assessed_attrs = assessed_attrs
+assessed_attrs = ["no"]  # Base attribute name
+context_df, annotated_df = add_quality_annotations_to_df(
+    context_df, time_series_df, assessed_attrs=assessed_attrs
 )
 ```
 
-Granular-level annotation:
-```python
-from InteroperabilityEnabler.utils.annotation_dataset import add_quality_annotations_to_df
-
-entity_type_annotation = "entity_type_value" # entity type for quality annotations
-assessed_attrs = ["currentTripCount[0]"]  # Base attribute name (metadata) - with the indice
-annotated_df = add_quality_annotations_to_df(
-   df, entity_type = entity_type_annotation, assessed_attrs = assessed_attrs
-)
-```
-
-#### Data Mapper (to convert the DataFrame into NGSI-LD json format)
+#### Data Mapper (to convert the DataFrame into JSON format)
 
 ```python
-from InteroperabilityEnabler.utils.data_mapper import data_conversion, restore_ngsi_ld_structure
+from InteroperabilityEnabler.utils.data_mapper import data_mapper
 
-data = data_conversion(annotated_df)
-data_restored = restore_ngsi_ld_structure(data) # to restore the original NGSI-LD structure
+data_json = data_mapper(context_df, annotated_df)
 ```
 
 #### Data Extractor (to extract and return specific columns from a pandas DataFrame)
@@ -89,9 +68,9 @@ data_restored = restore_ngsi_ld_structure(data) # to restore the original NGSI-L
 from InteroperabilityEnabler.utils.extract_data import extract_columns
 
 # Select columns by index
-column_indices = [5, 7]
+column_indices = [2, 5]
 
-selected_df, selected_column_names = extract_columns(df, column_indices)
+selected_df, selected_column_names = extract_columns(time_series_df, column_indices)
 
 print("\nSelected DataFrame:")
 print(selected_df)
@@ -120,10 +99,10 @@ predicted_df = add_metadata_to_predictions_from_dataframe(
 from InteroperabilityEnabler.utils.merge_data import merge_predicted_data
 
 # To combine the original input data with the corresponding prediction results from an AI model
-merged_df = merge_predicted_data(df, predicted_df)
+merged_df = merge_predicted_data(time_series_df, predicted_df)
 ```
 
 ## Acknowledgement
 
-This software has been developed by the [Inria](https://www.inria.fr/fr) under the [SEDIMARK(SEcure Decentralised Intelligent Data MARKetplace)](https://sedimark.eu/) project. 
+This software has been developed by [Inria](https://www.inria.fr/fr) under the [SEDIMARK(SEcure Decentralised Intelligent Data MARKetplace)](https://sedimark.eu/) project. 
 SEDIMARK is funded by the European Union under the Horizon Europe framework programme [grant no. 101070074]. 
