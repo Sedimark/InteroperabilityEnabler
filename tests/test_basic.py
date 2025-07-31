@@ -1,7 +1,6 @@
 import pandas as pd
-import numpy as np
 import pytest
-from InteroperabilityEnabler.utils.data_formatter import data_to_dataframe
+from InteroperabilityEnabler.utils.data_formatter import data_formatter
 from InteroperabilityEnabler.utils.annotation_dataset import add_quality_annotations_to_df
 from io import StringIO
 from InteroperabilityEnabler.utils.merge_data import merge_predicted_data
@@ -11,7 +10,7 @@ from InteroperabilityEnabler.utils.data_mapper import data_mapper
 import json
 
 
-FILE_PATH_JSON = "example_json.json"
+FILE_PATH_JSON = "tests/example_json.json"
 
 
 MOCK_CSV = """
@@ -44,7 +43,7 @@ def test_data_formatter(file_path):
         json_data = json.load(f)
 
     # Run the formatter
-    context_df, time_series_df = data_to_dataframe(json_data, sep="__")
+    context_df, time_series_df = data_formatter(json_data, sep="__")
 
     # Assertions (use `assert`, not `assertEqual`)
     assert context_df.iloc[0]["id"] == "urn:sedimark:station:1"
@@ -62,7 +61,7 @@ def test_instance_level_annotation(file_path):
         json_data = json.load(f)
 
     # Convert to DataFrames
-    context_df, time_series_df = data_to_dataframe(json_data, sep="__")
+    context_df, time_series_df = data_formatter(json_data, sep="__")
 
     # Apply instance-level annotation
     updated_context_df, updated_time_series_df = add_quality_annotations_to_df(
@@ -90,7 +89,7 @@ def test_attribute_level_annotation(file_path):
         json_data = json.load(f)
 
     # Convert to DataFrames
-    context_df, time_series_df = data_to_dataframe(json_data, sep="__")
+    context_df, time_series_df = data_formatter(json_data, sep="__")
 
     # Apply attribute-level annotation on 'pm10'
     updated_context_df, updated_time_series_df = add_quality_annotations_to_df(
@@ -129,7 +128,7 @@ def test_data_mapper(file_path):
         json_data = json.load(f)
 
     # Format data
-    context_df, time_series_df = data_to_dataframe(json_data, sep="__")
+    context_df, time_series_df = data_formatter(json_data, sep="__")
 
     # Apply attribute-level annotation on 'no2'
     context_df, time_series_df = add_quality_annotations_to_df(
