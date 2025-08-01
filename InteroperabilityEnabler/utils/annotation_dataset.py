@@ -9,78 +9,57 @@ import pandas as pd
 
 
 def add_quality_annotations_to_df(
-    data, entity_type, assessed_attrs=None, type=None, context_value=None
+    context_df, time_series_df, sep="__", assessed_attrs=None
 ):
     """
-    Add quality annotations to a DataFrame for either
-    instance-level or attribute-level annotations (but not both).
+    Add NGSI-LD quality annotations to either the context (instance-level)
+    or the time series (attribute-level).
 
     Args:
-        data (DataFrame): The flattened NGSI-LD data.
-        entity_type (str): The NGSI-LD entity type for quality annotations.
-        assessed_attrs (list of str): To annotate with quality information (if None, annotate entire instance).
-        type (str): The default `type` for the DataFrame rows if not already exist.
-        context_value (str or list): The value to assign to the `@context` column if it does not exist.
+        context_df (pd.DataFrame): Single-row DataFrame with 'id' and 'type'.
+        time_series_df (pd.DataFrame): Flattened time series DataFrame.
+        sep (str): Separator used in flattened column names (default: "__").
+        assessed_attrs (list of str, optional): List of attributes to annotate.
+            If None, annotate the context (instance-level).
 
     Returns:
-        Pandas DataFrame with additional quality annotation columns.
+        Tuple[pd.DataFrame, pd.DataFrame]: (updated context_df, updated time_series_df)
     """
-    annotated_data = data.copy()
-    new_columns = {}  # Dictionary to store new columns
+    # Copy inputs to avoid mutation
+    context_df = context_df.copy()
+    time_series_df = time_series_df.copy()
 
-    # Ensure the 'type' column exists; if not, create it
-    if "type" not in annotated_data.columns:
-        new_columns["type"] = type
-
-    # Ensure the 'id' column exists; if not, create it
-    if "id" not in annotated_data.columns:
-        new_columns["id"] = annotated_data.apply(
-            lambda row: f"urn:ngsi-ld:{row['type']}:{row.name}", axis=1
-        )
-
-    # Handle @context column (optional)
-    if context_value is not None:  # Only add @context if context_value is provided
-        if "@context" not in annotated_data.columns:
-            if isinstance(context_value, list):
-                # Apply the list across all rows
-                new_columns["@context"] = [context_value] * len(annotated_data)
-            elif isinstance(context_value, str):
-                # Apply the string across all rows
-                new_columns["@context"] = context_value
+    entity_id = context_df.loc[0, "id"]
+    entity_type = context_df.loc[0, "type"]
 
     if assessed_attrs is None:
-        # Annotate the entire instance (data point)
-        new_columns["hasQuality.type"] = "Relationship"
-        new_columns["hasQuality.object"] = annotated_data.apply(
-            lambda row: f"urn:ngsi-ld:DataQualityAssessment:{entity_type}:{row['id']}",
-            axis=1,
+        # Instance-level annotation → attach to context
+        context_df[f"hasQuality{sep}type"] = "Relationship"
+        context_df[f"hasQuality{sep}object"] = (
+            f"urn:ngsi-ld:DataQualityAssessment:{entity_type}:{entity_id}"
         )
     else:
-        # Annotate specific attributes
+        # Attribute-level annotation → apply per-attribute, per-row
         for attr in assessed_attrs:
-            # Identify columns that start with the attribute name
-            matching_columns = [col for col in data.columns if col.startswith(attr)]
-            if not matching_columns:
-                raise ValueError(f"Attribute '{attr}' not found in DataFrame columns.")
+            attr_cols = [
+                col for col in time_series_df.columns if col.startswith(f"{attr}{sep}")
+            ]
+            if not attr_cols:
+                raise ValueError(f"Attribute '{attr}' not found in DataFrame.")
 
-            # Add quality annotation for each matching attribute column
-            for col in matching_columns:
-                base_attr = col.split(".")[0]  # Extract the base attribute name
-                quality_type_col = f"{base_attr}.hasQuality.type"
-                quality_object_col = f"{base_attr}.hasQuality.object"
+            rows_to_annotate = time_series_df[attr_cols].notna().any(axis=1)
 
-                # Collect new columns in the dictionary
-                new_columns[quality_type_col] = "Relationship"
-                new_columns[quality_object_col] = annotated_data.apply(
-                    lambda row: f"urn:ngsi-ld:DataQualityAssessment:{entity_type}:{row['id']}:{base_attr}".split(
-                        "["
-                    )[
-                        0
-                    ],
-                    axis=1,
-                )
+            quality_type_col = f"{attr}{sep}hasQuality{sep}type"
+            quality_obj_col = f"{attr}{sep}hasQuality{sep}object"
 
-    # Update DataFrame in one go using `pd.concat` to avoid fragmentation
-    annotated_data = pd.concat([annotated_data, pd.DataFrame(new_columns)], axis=1)
+            # Initialize empty columns with None
+            time_series_df[quality_type_col] = None
+            time_series_df[quality_obj_col] = None
 
-    return annotated_data
+            # Apply values only to relevant rows
+            time_series_df.loc[rows_to_annotate, quality_type_col] = "Relationship"
+            time_series_df.loc[rows_to_annotate, quality_obj_col] = (
+                f"urn:ngsi-ld:DataQualityAssessment:{entity_type}:{entity_id}:{attr}"
+            )
+
+    return context_df, time_series_df

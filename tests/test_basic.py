@@ -1,46 +1,16 @@
 import pandas as pd
-import numpy as np
 import pytest
-from InteroperabilityEnabler.utils.data_formatter import data_to_dataframe
+from InteroperabilityEnabler.utils.data_formatter import data_formatter
 from InteroperabilityEnabler.utils.annotation_dataset import add_quality_annotations_to_df
-from InteroperabilityEnabler.utils.data_mapper import data_conversion, restore_ngsi_ld_structure
 from io import StringIO
 from InteroperabilityEnabler.utils.merge_data import merge_predicted_data
 from InteroperabilityEnabler.utils.extract_data import extract_columns
 from InteroperabilityEnabler.utils.add_metadata import add_metadata_to_predictions_from_dataframe
+from InteroperabilityEnabler.utils.data_mapper import data_mapper
+import json
 
 
 FILE_PATH_JSON = "tests/example_json.json"
-
-# Expected values to validate
-DATA = {
-    "id": "urn:ngsild:Vehicle:vehicle:MobilityManagement:196671",
-    "type": "Vehicle",
-    "category.type": "Property",
-    "category.value": "tracked",
-    "vehicleNumber.type": "Property",
-    "vehicleNumber.value": "379131",
-    "battery[0].type": "Property",
-    "battery[0].value": 1,
-    "battery[0].observedAt": "2024-09-25T04:30:06Z",
-    "battery[0].unitCode": "P1",
-    "battery[1].type": "Property",
-    "battery[1].value": 0.98,
-    "battery[1].observedAt": "2024-09-24T16:42:24Z",
-    "battery[1].unitCode": "P1",
-    "location[0].type": "GeoProperty",
-    "location[0].value.type": "Point",
-    "location[0].value.coordinates": [43.460405, -3.853312],
-    "location[0].observedAt": "2024-09-24T15:45:58Z",
-    "location[1].type": "GeoProperty",
-    "location[1].value.type": "Point",
-    "location[1].value.coordinates": [43.459994, -3.820141],
-    "location[1].observedAt": "2024-09-24T15:09:14Z",
-    "@context": [
-        "https://raw.githubusercontent.com/smart-data-models/dataModel.ERA/master/context.jsonld",
-        "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context-v1.7.jsonld",
-    ],
-}
 
 
 MOCK_CSV = """
@@ -67,129 +37,143 @@ PREDICTED_CSV = """
 
 
 @pytest.mark.parametrize("file_path", [FILE_PATH_JSON])
-def test_json_to_dataframe(file_path):
+def test_data_formatter(file_path):
     """
-    Data Formatter component tests: JSON to DataFrame
+    Data Formatter component tests.
+    Converts JSON data to DataFrames.
     """
-    print("\nJData Formatter component tests: JSON to DataFrame.")
-    df = data_to_dataframe(file_path)
-    assert isinstance(df, pd.DataFrame), f"{file_path} did not return a DataFrame"
-    assert not df.empty, f"{file_path} returned an empty DataFrame"
-    row = df.loc[0]
-    for key, expected_value in DATA.items():
-        assert key in row, f"Missing key '{key}' in DataFrame from {file_path}"
-        assert (
-            row[key] == expected_value
-        ), f"Mismatch for '{key}' in {file_path}: expected {expected_value}, got {row[key]}"
+    # Load the JSON file from disk
+    with open(file_path, "r", encoding="utf-8") as f:
+        json_data = json.load(f)
+
+    # Run the formatter
+    context_df, time_series_df = data_formatter(json_data, sep="__")
+
+    # Assertions (use `assert`, not `assertEqual`)
+    assert context_df.iloc[0]["id"] == "urn:sedimark:station:1"
+    assert context_df.iloc[0]["type"] == "MonitoringSite"
+    assert "pm10__value" in time_series_df.columns
+    assert "pnci__value" in time_series_df.columns
+    assert time_series_df["pm10__value"].iloc[3] == 22.9
 
 
-def test_instance_level_annotation():
-    """
-    Data Quality Annotation component tests.
-    Entire instance level annotation.
-    """
-    print(
-        "\nData Quality Annotation component tests: entire instance level annotation."
-    )
-    df = pd.DataFrame(DATA)
-    result = add_quality_annotations_to_df(
-        data=df,
-        entity_type="Vehicle",
-        assessed_attrs=None,
-    )
-    assert "hasQuality.type" in result.columns
-    assert "hasQuality.object" in result.columns
-    assert result.loc[0, "hasQuality.type"] == "Relationship"
-    assert (
-        result.loc[0, "hasQuality.object"]
-        == "urn:ngsi-ld:DataQualityAssessment:Vehicle:urn:ngsild:Vehicle:vehicle:MobilityManagement:196671"
-    )
 
+@pytest.mark.parametrize("file_path", [FILE_PATH_JSON])
+def test_instance_level_annotation(file_path):
+    """
+    Data quality annotation component tests.
+    Instance-level annotations.
+    """
+    # Load JSON data
+    with open(file_path, "r", encoding="utf-8") as f:
+        json_data = json.load(f)
 
-def test_attribute_level_annotation():
-    """
-    Data Quality Annotation component tests.
-    Attribute level annotation.
-    """
-    print("\nData Quality Annotation component tests: attribute level annotation.")
-    df = pd.DataFrame(DATA)
-    result = add_quality_annotations_to_df(
-        data=df, entity_type="Vehicle", assessed_attrs=["battery"]
+    # Convert to DataFrames
+    context_df, time_series_df = data_formatter(json_data, sep="__")
+
+    # Apply instance-level annotation
+    updated_context_df, updated_time_series_df = add_quality_annotations_to_df(
+            context_df, time_series_df, sep="__", assessed_attrs=None
     )
 
-    for i in [0, 1]:  # because your example has battery[0] and battery[1]
-        type_col = f"battery[{i}].hasQuality.type"
-        object_col = f"battery[{i}].hasQuality.object"
-        assert type_col in result.columns
-        assert object_col in result.columns
-        assert result.loc[0, type_col] == "Relationship"
-        assert result.loc[0, object_col] == (
-            f"urn:ngsi-ld:DataQualityAssessment:Vehicle:urn:ngsild:Vehicle:vehicle:MobilityManagement:196671:battery"
-        )
+    # Assertions for context-level quality annotation
+    assert "hasQuality__type" in updated_context_df.columns
+    assert "hasQuality__object" in updated_context_df.columns
 
-
-def test_granular_level_annotation():
-    """
-    Data Quality Annotation component tests.
-    Granular level annotation.
-    """
-    print("\nData Quality Annotation component tests: granular level annotation.")
-    df = pd.DataFrame(DATA)
-    result = add_quality_annotations_to_df(
-        data=df, entity_type="Vehicle", assessed_attrs=["battery[0]"]
-    )
-    assert "battery[0].hasQuality.type" in result.columns
-    assert "battery[0].hasQuality.object" in result.columns
-    assert result.loc[0, "battery[0].hasQuality.type"] == "Relationship"
-    assert (
-        result.loc[0, "battery[0].hasQuality.object"]
-        == "urn:ngsi-ld:DataQualityAssessment:Vehicle:urn:ngsild:Vehicle:vehicle:MobilityManagement:196671:battery"
+    assert updated_context_df.loc[0, "hasQuality__type"] == "Relationship"
+    assert updated_context_df.loc[0, "hasQuality__object"] == (
+        "urn:ngsi-ld:DataQualityAssessment:MonitoringSite:urn:sedimark:station:1"
     )
 
+    # Time-series DataFrame should remain unchanged
+    assert "pm10__hasQuality__type" not in updated_time_series_df.columns
 
-def test_data_mapper():
+
+
+@pytest.mark.parametrize("file_path", [FILE_PATH_JSON])
+def test_attribute_level_annotation(file_path):
+    """
+    Data quality annotation component tests.
+    Attribut-level annotation.
+    """
+    # Load JSON data from file
+    with open(file_path, "r", encoding="utf-8") as f:
+        json_data = json.load(f)
+
+    # Convert to DataFrames
+    context_df, time_series_df = data_formatter(json_data, sep="__")
+
+    # Apply attribute-level annotation on 'pm10'
+    updated_context_df, updated_time_series_df = add_quality_annotations_to_df(
+        context_df,
+        time_series_df,
+        sep="__",
+        assessed_attrs=["pm10"]
+    )
+
+    # Check that new quality columns are added for 'pm10'
+    assert "pm10__hasQuality__type" in updated_time_series_df.columns
+    assert "pm10__hasQuality__object" in updated_time_series_df.columns
+
+    # Ensure all annotated rows have correct values
+    expected_object_uri = (
+        "urn:ngsi-ld:DataQualityAssessment:MonitoringSite:urn:sedimark:station:1:pm10"
+    )
+
+    for i in range(len(updated_time_series_df)):
+        has_value = pd.notna(updated_time_series_df.loc[i, "pm10__value"])
+        expected_type = "Relationship" if has_value else None
+        expected_obj = expected_object_uri if has_value else None
+
+        assert updated_time_series_df.loc[i, "pm10__hasQuality__type"] == expected_type
+        assert updated_time_series_df.loc[i, "pm10__hasQuality__object"] == expected_obj
+
+    # Confirm context_df is unchanged (no instance-level fields)
+    assert "hasQuality__type" not in updated_context_df.columns
+
+
+
+@pytest.mark.parametrize("file_path", [FILE_PATH_JSON])
+def test_data_mapper(file_path):
     """
     Data Mapper component tests.
-    JSON to NGSI-LD
+    Converts structured data to JSON format.
     """
-    print("\nData Mapper component tests: JSON to NGSI-LD")
-    df = pd.DataFrame([DATA])
-    ngsi_ld_data = data_conversion(df)
-    assert isinstance(ngsi_ld_data, list)
-    assert len(ngsi_ld_data) == 1
-    entity = ngsi_ld_data[0]
-    assert entity["id"] == DATA["id"]
-    assert entity["type"] == DATA["type"]
-    assert entity["category"]["type"] == "Property"
-    assert entity["category"]["value"] == "tracked"
-    assert entity["vehicleNumber"]["type"] == "Property"
-    assert entity["vehicleNumber"]["value"] == "379131"
-    assert "battery[0]" in entity
-    assert entity["battery[0]"]["type"] == "Property"
-    assert entity["battery[0]"]["value"] == 1
-    assert entity["battery[0]"]["observedAt"] == "2024-09-25T04:30:06Z"
-    assert "location[1]" in entity
-    assert entity["location[1]"]["value"]["type"] == "Point"
-    assert entity["location[1]"]["value"]["coordinates"] == [43.459994, -3.820141]
-    assert "@context" in entity
+    # Load JSON data
+    with open(file_path, "r", encoding="utf-8") as f:
+        json_data = json.load(f)
 
+    # Format data
+    context_df, time_series_df = data_formatter(json_data, sep="__")
 
-def test_restore_ngsi_ld_structure():
-    """
-    Data Mapper component tests.
-    Restore NGSI-LD structure.
-    """
-    print("\nData Mapper component tests: NGSI-LD structure restoration.")
-    df = pd.DataFrame([DATA])
-    ngsi_ld_data = data_conversion(df)
-    restored = restore_ngsi_ld_structure(ngsi_ld_data[0])
-    assert "battery" in restored
-    assert isinstance(restored["battery"], list)
-    assert restored["battery"][0]["type"] == "Property"
-    assert restored["battery"][1]["value"] == 0.98
-    assert "location" in restored
-    assert isinstance(restored["location"], list)
-    assert restored["location"][1]["value"]["coordinates"] == [43.459994, -3.820141]
+    # Apply attribute-level annotation on 'no2'
+    context_df, time_series_df = add_quality_annotations_to_df(
+        context_df,
+        time_series_df,
+        sep="__",
+        assessed_attrs=["no2"]
+    )
+
+    # Map back to JSON structure
+    mapped_data = data_mapper(context_df, time_series_df, sep="__")
+
+    # Assertions
+    assert isinstance(mapped_data, dict)
+    assert mapped_data["id"] == "urn:sedimark:station:1"
+    assert mapped_data["type"] == "MonitoringSite"
+    assert "no2" in mapped_data
+
+    # Check at least one annotation exists for 'no2'
+    no2_values = mapped_data["no2"]
+    assert isinstance(no2_values, list)
+
+    found_annotated = any(
+        "hasQuality" in item and
+        item["hasQuality"]["type"] == "Relationship" and
+        item["hasQuality"]["object"].endswith(":no2")
+        for item in no2_values
+    )
+    assert found_annotated, "No attribute-level annotation found for no2"
 
 
 def test_extract_columns_valid_indices():

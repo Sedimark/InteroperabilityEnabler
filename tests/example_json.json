@@ -1,36 +1,230 @@
 {
-    "id": "urn:ngsild:Vehicle:vehicle:MobilityManagement:196671",
-    "type": "Vehicle",
-    "category": {"type": "Property", "value": "tracked"},
-    "vehicleNumber": {"type": "Property", "value": "379131"},
-    "battery": [
+    "id": "urn:sedimark:station:1",
+    "type": "MonitoringSite",
+    "specificAccessPolicy": [
         {
             "type": "Property",
-            "value": 1,
-            "observedAt": "2024-09-25T04:30:06Z",
-            "unitCode": "P1"
+            "value": "AUTH_WRITE"
+        }
+    ],
+    "pm10": [
+        {
+            "type": "Property",
+            "value": 22.9,
+            "instanceId": "urn:ngsi-ld:Instance:32e14421-e740-4722-8f6f-00922a7d9bf1",
+            "observedAt": "2025-07-24T12:00:00Z"
         },
         {
             "type": "Property",
-            "value": 0.98,
-            "observedAt": "2024-09-24T16:42:24Z",
-            "unitCode": "P1"
-        }
-    ],
-    "location": [
-        {
-            "type": "GeoProperty",
-            "value": {"type": "Point", "coordinates": [43.460405, -3.853312]},
-            "observedAt": "2024-09-24T15:45:58Z"
+            "value": 24.2,
+            "instanceId": "urn:ngsi-ld:Instance:0c4f6936-aa78-45bd-a225-8c7f487726f5",
+            "observedAt": "2025-07-24T13:00:00Z"
         },
         {
-            "type": "GeoProperty",
-            "value": {"type": "Point", "coordinates": [43.459994, -3.820141]},
-            "observedAt": "2024-09-24T15:09:14Z"
+            "type": "Property",
+            "value": 23,
+            "instanceId": "urn:ngsi-ld:Instance:8166c0ed-38cc-42c6-b148-6fded91bc39b",
+            "observedAt": "2025-07-24T14:00:00Z"
         }
     ],
-    "@context": [
-        "https://raw.githubusercontent.com/smart-data-models/dataModel.ERA/master/context.jsonld",
-        "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context-v1.7.jsonld"
+    "pnci": [
+        {
+            "type": "Property",
+            "value": 6983,
+            "instanceId": "urn:ngsi-ld:Instance:8b3be0e3-4166-4cba-b5e5-b7d2f57f57a3",
+            "observedAt": "2025-07-24T12:00:00Z"
+        },
+        {
+            "type": "Property",
+            "value": 7028,
+            "instanceId": "urn:ngsi-ld:Instance:2ec355ba-d151-454f-86fb-60f210f782ad",
+            "observedAt": "2025-07-24T13:00:00Z"
+        },
+        {
+            "type": "Property",
+            "value": 6765,
+            "instanceId": "urn:ngsi-ld:Instance:3f902dc0-6969-496d-802d-9bc3fcb66eac",
+            "observedAt": "2025-07-24T14:00:00Z"
+        }
+    ],
+    "no": [
+        {
+            "type": "Property",
+            "value": 3,
+            "instanceId": "urn:ngsi-ld:Instance:ad99ae3c-aef3-49ea-894e-7cfa484411ef",
+            "observedAt": "2025-07-24T12:00:00Z"
+        },
+        {
+            "type": "Property",
+            "value": 3.9,
+            "instanceId": "urn:ngsi-ld:Instance:83ab9f5c-f592-43d6-b4bd-2b33e8746c7c",
+            "observedAt": "2025-07-24T13:00:00Z"
+        },
+        {
+            "type": "Property",
+            "value": 2.6,
+            "instanceId": "urn:ngsi-ld:Instance:2b0f1a1e-dc04-47cf-b442-0337d1243113",
+            "observedAt": "2025-07-24T14:00:00Z"
+        }
+    ],
+    "indeksi": [
+        {
+            "type": "Property",
+            "value": 61,
+            "instanceId": "urn:ngsi-ld:Instance:5fb47305-23c9-42a0-b1d1-948d788bded8",
+            "observedAt": "2025-07-24T12:00:00Z"
+        },
+        {
+            "type": "Property",
+            "value": 61,
+            "instanceId": "urn:ngsi-ld:Instance:17fbc692-b0c0-487c-96e3-4eb46be507d8",
+            "observedAt": "2025-07-24T13:00:00Z"
+        },
+        {
+            "type": "Property",
+            "value": 60,
+            "instanceId": "urn:ngsi-ld:Instance:6f1344a7-ad6f-4a61-9c4c-ea96e56c41e9",
+            "observedAt": "2025-07-24T14:00:00Z"
+        }
+    ],
+    "pm25": [
+        {
+            "type": "Property",
+            "value": 16.8,
+            "instanceId": "urn:ngsi-ld:Instance:584ec5f5-0aca-4ec3-9ba5-35f628eaff46",
+            "observedAt": "2025-07-24T12:00:00Z"
+        },
+        {
+            "type": "Property",
+            "value": 16.6,
+            "instanceId": "urn:ngsi-ld:Instance:72f5e615-0dd3-4971-9a26-812e15eec47b",
+            "observedAt": "2025-07-24T13:00:00Z"
+        },
+        {
+            "type": "Property",
+            "value": 16.3,
+            "instanceId": "urn:ngsi-ld:Instance:efddb845-b38e-4ff3-b34a-7e3f3dc402aa",
+            "observedAt": "2025-07-24T14:00:00Z"
+        }
+    ],
+    "no2": [
+        {
+            "type": "Property",
+            "value": 10.9,
+            "instanceId": "urn:ngsi-ld:Instance:56c842df-0861-4e9c-84b5-ebb536f6ab54",
+            "observedAt": "2025-07-24T12:00:00Z"
+        },
+        {
+            "type": "Property",
+            "value": 10.8,
+            "instanceId": "urn:ngsi-ld:Instance:6fb8fbd6-8049-43fe-8cf3-54ceb341d2de",
+            "observedAt": "2025-07-24T13:00:00Z"
+        },
+        {
+            "type": "Property",
+            "value": 9.6,
+            "instanceId": "urn:ngsi-ld:Instance:54969cbf-d553-4d26-a3ef-f1c0b7d53882",
+            "observedAt": "2025-07-24T14:00:00Z"
+        }
+    ],
+    "https://vocab.egm.io/pm25": [
+        {
+            "type": "Property",
+            "value": 6.6,
+            "instanceId": "urn:ngsi-ld:Instance:fb243b31-e8f0-4880-be7c-a27d7e5a0826",
+            "observedAt": "2025-04-17T06:00:00Z"
+        },
+        {
+            "type": "Property",
+            "value": 7,
+            "instanceId": "urn:ngsi-ld:Instance:71faec96-9f9a-493d-b959-a891ff8b7c10",
+            "observedAt": "2025-04-17T07:00:00Z"
+        },
+        {
+            "type": "Property",
+            "value": 7,
+            "instanceId": "urn:ngsi-ld:Instance:4e1438f1-97c6-462c-9947-40afb8a0e080",
+            "observedAt": "2025-04-17T08:00:00Z"
+        }
+    ],
+    "ldsa": [
+        {
+            "type": "Property",
+            "value": 13.3,
+            "instanceId": "urn:ngsi-ld:Instance:f75c79c8-9075-4ecd-8a6b-5ccf264a2b29",
+            "observedAt": "2025-07-24T12:00:00Z"
+        },
+        {
+            "type": "Property",
+            "value": 13.1,
+            "instanceId": "urn:ngsi-ld:Instance:188cc122-e714-4da6-8182-00511e42729d",
+            "observedAt": "2025-07-24T13:00:00Z"
+        },
+        {
+            "type": "Property",
+            "value": 12.5,
+            "instanceId": "urn:ngsi-ld:Instance:2621e03c-da76-487f-a326-79225c12c46e",
+            "observedAt": "2025-07-24T14:00:00Z"
+        }
+    ],
+    "https://vocab.egm.io/pm10": [
+        {
+            "type": "Property",
+            "value": 11.3,
+            "instanceId": "urn:ngsi-ld:Instance:d78fe8be-0c9a-460b-a696-ad60c8ddb5da",
+            "observedAt": "2025-04-17T06:00:00Z"
+        },
+        {
+            "type": "Property",
+            "value": 11.4,
+            "instanceId": "urn:ngsi-ld:Instance:eb2c5e91-cd24-4223-bb5b-d6d32e7faf7a",
+            "observedAt": "2025-04-17T07:00:00Z"
+        },
+        {
+            "type": "Property",
+            "value": 11.5,
+            "instanceId": "urn:ngsi-ld:Instance:239870a1-22c6-430b-be85-828f3848c16f",
+            "observedAt": "2025-04-17T08:00:00Z"
+        }
+    ],
+    "https://vocab.egm.io/no2": [
+        {
+            "type": "Property",
+            "value": 10.5,
+            "instanceId": "urn:ngsi-ld:Instance:b4ac0ff4-ea60-4696-85cc-de998380777f",
+            "observedAt": "2025-04-17T06:00:00Z"
+        },
+        {
+            "type": "Property",
+            "value": 26.1,
+            "instanceId": "urn:ngsi-ld:Instance:f9078b14-1845-47c9-8ebc-829325ad0d14",
+            "observedAt": "2025-04-17T07:00:00Z"
+        },
+        {
+            "type": "Property",
+            "value": 36,
+            "instanceId": "urn:ngsi-ld:Instance:1103c1eb-353f-42dc-a672-e81950e893b3",
+            "observedAt": "2025-04-17T08:00:00Z"
+        }
+    ],
+    "bc": [
+        {
+            "type": "Property",
+            "value": 0.43,
+            "instanceId": "urn:ngsi-ld:Instance:5e17b87b-e6e4-4bc7-9095-8fce8456f35d",
+            "observedAt": "2025-07-24T12:00:00Z"
+        },
+        {
+            "type": "Property",
+            "value": 0.59,
+            "instanceId": "urn:ngsi-ld:Instance:54412842-086f-40f3-bd7b-910a9243be21",
+            "observedAt": "2025-07-24T13:00:00Z"
+        },
+        {
+            "type": "Property",
+            "value": 0.51,
+            "instanceId": "urn:ngsi-ld:Instance:16471be2-77f4-40ac-9c6e-e02fe1937340",
+            "observedAt": "2025-07-24T14:00:00Z"
+        }
     ]
 }
