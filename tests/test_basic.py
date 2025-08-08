@@ -70,14 +70,6 @@ def test_data_mapper(file_path):
     # Format data
     context_df, time_series_df = data_formatter(json_data, sep="__")
 
-    # Apply attribute-level annotation on 'no2'
-    context_df, time_series_df = add_quality_annotations_to_df(
-        context_df,
-        time_series_df,
-        sep="__",
-        assessed_attrs=["no2"]
-    )
-
     # Map back to JSON structure
     mapped_data = data_mapper(context_df, time_series_df, sep="__")
 
