@@ -1,7 +1,6 @@
 import pandas as pd
 import pytest
 from InteroperabilityEnabler.utils.data_formatter import data_formatter
-from InteroperabilityEnabler.utils.annotation_dataset import add_quality_annotations_to_df
 from io import StringIO
 from InteroperabilityEnabler.utils.merge_data import merge_predicted_data
 from InteroperabilityEnabler.utils.extract_data import extract_columns
@@ -59,81 +58,6 @@ def test_data_formatter(file_path):
 
 
 @pytest.mark.parametrize("file_path", [FILE_PATH_JSON])
-def test_instance_level_annotation(file_path):
-    """
-    Data quality annotation component tests.
-    Instance-level annotations.
-    """
-    # Load JSON data
-    with open(file_path, "r", encoding="utf-8") as f:
-        json_data = json.load(f)
-
-    # Convert to DataFrames
-    context_df, time_series_df = data_formatter(json_data, sep="__")
-
-    # Apply instance-level annotation
-    updated_context_df, updated_time_series_df = add_quality_annotations_to_df(
-            context_df, time_series_df, sep="__", assessed_attrs=None
-    )
-
-    # Assertions for context-level quality annotation
-    assert "hasQuality__type" in updated_context_df.columns
-    assert "hasQuality__object" in updated_context_df.columns
-
-    assert updated_context_df.loc[0, "hasQuality__type"] == "Relationship"
-    assert updated_context_df.loc[0, "hasQuality__object"] == (
-        "urn:ngsi-ld:DataQualityAssessment:MonitoringSite:urn:sedimark:station:1"
-    )
-
-    # Time-series DataFrame should remain unchanged
-    assert "pm10__hasQuality__type" not in updated_time_series_df.columns
-
-
-
-@pytest.mark.parametrize("file_path", [FILE_PATH_JSON])
-def test_attribute_level_annotation(file_path):
-    """
-    Data quality annotation component tests.
-    Attribut-level annotation.
-    """
-    # Load JSON data from file
-    with open(file_path, "r", encoding="utf-8") as f:
-        json_data = json.load(f)
-
-    # Convert to DataFrames
-    context_df, time_series_df = data_formatter(json_data, sep="__")
-
-    # Apply attribute-level annotation on 'pm10'
-    updated_context_df, updated_time_series_df = add_quality_annotations_to_df(
-        context_df,
-        time_series_df,
-        sep="__",
-        assessed_attrs=["pm10"]
-    )
-
-    # Check that new quality columns are added for 'pm10'
-    assert "pm10__hasQuality__type" in updated_time_series_df.columns
-    assert "pm10__hasQuality__object" in updated_time_series_df.columns
-
-    # Ensure all annotated rows have correct values
-    expected_object_uri = (
-        "urn:ngsi-ld:DataQualityAssessment:MonitoringSite:urn:sedimark:station:1:pm10"
-    )
-
-    for i in range(len(updated_time_series_df)):
-        has_value = pd.notna(updated_time_series_df.loc[i, "pm10__value"])
-        expected_type = "Relationship" if has_value else None
-        expected_obj = expected_object_uri if has_value else None
-
-        assert updated_time_series_df.loc[i, "pm10__hasQuality__type"] == expected_type
-        assert updated_time_series_df.loc[i, "pm10__hasQuality__object"] == expected_obj
-
-    # Confirm context_df is unchanged (no instance-level fields)
-    assert "hasQuality__type" not in updated_context_df.columns
-
-
-
-@pytest.mark.parametrize("file_path", [FILE_PATH_JSON])
 def test_data_mapper(file_path):
     """
     Data Mapper component tests.
@@ -146,14 +70,6 @@ def test_data_mapper(file_path):
     # Format data
     context_df, time_series_df = data_formatter(json_data, sep="__")
 
-    # Apply attribute-level annotation on 'no2'
-    context_df, time_series_df = add_quality_annotations_to_df(
-        context_df,
-        time_series_df,
-        sep="__",
-        assessed_attrs=["no2"]
-    )
-
     # Map back to JSON structure
     mapped_data = data_mapper(context_df, time_series_df, sep="__")
 
@@ -162,18 +78,6 @@ def test_data_mapper(file_path):
     assert mapped_data["id"] == "urn:sedimark:station:1"
     assert mapped_data["type"] == "MonitoringSite"
     assert "no2" in mapped_data
-
-    # Check at least one annotation exists for 'no2'
-    no2_values = mapped_data["no2"]
-    assert isinstance(no2_values, list)
-
-    found_annotated = any(
-        "hasQuality" in item and
-        item["hasQuality"]["type"] == "Relationship" and
-        item["hasQuality"]["object"].endswith(":no2")
-        for item in no2_values
-    )
-    assert found_annotated, "No attribute-level annotation found for no2"
 
 
 def test_extract_columns_valid_indices():

@@ -6,7 +6,6 @@ Interoperability Enabler (IE) component is designed to facilitate seamless integ
 ## Key Feature
 
 - Data Formatter - Convert JSON data (time-series data) into the SEDIMARK internal processing format (pandas DataFrames)
-- Data Quality Annotations - Enable adding any kind of quality annotations to data inside pandas DataFrames
 - Data Mapper – Convert data from pandas DataFrames into JSON
 - Data Extractor – Extract relevant data from a pandas DataFrame
 - Metadata Restorer – Restore metadata to a pandas DataFrame
@@ -37,7 +36,6 @@ InteroperabilityEnabler
 │   └── utils
 │       ├── __init__.py
 │       ├── add_metadata.py
-│       ├── annotation_dataset.py
 │       ├── data_formatter.py
 │       ├── data_mapper.py
 │       ├── extract_data.py
@@ -64,34 +62,12 @@ FILE_PATH="sample.json"
 context_df, time_series_df = data_formatter(FILE_PATH)
 ```
 
-
-#### Data Quality Annotations (to enrich pandas DataFrames by adding quality annotations)
-
-Instance-level annotations:
-```python
-from InteroperabilityEnabler.utils.annotation_dataset import add_quality_annotations_to_df
-
-context_df, annotated_df = add_quality_annotations_to_df(
-    context_df, time_series_df, assessed_attrs=None
-)
-```
-
-Attribute-level annotation:
-```python
-from InteroperabilityEnabler.utils.annotation_dataset import add_quality_annotations_to_df
-
-assessed_attrs = ["no"]  # Base attribute name
-context_df, annotated_df = add_quality_annotations_to_df(
-    context_df, time_series_df, assessed_attrs=assessed_attrs
-)
-```
-
 #### Data Mapper (to convert the DataFrame into JSON format)
 
 ```python
 from InteroperabilityEnabler.utils.data_mapper import data_mapper
 
-data_json = data_mapper(context_df, annotated_df)
+data_json = data_mapper(context_df, time_series_df)
 ```
 
 #### Data Extractor (to extract and return specific columns from a pandas DataFrame)
