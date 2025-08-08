@@ -1,7 +1,6 @@
 import pandas as pd
 import pytest
 from InteroperabilityEnabler.utils.data_formatter import data_formatter
-from InteroperabilityEnabler.utils.annotation_dataset import add_quality_annotations_to_df
 from io import StringIO
 from InteroperabilityEnabler.utils.merge_data import merge_predicted_data
 from InteroperabilityEnabler.utils.extract_data import extract_columns
